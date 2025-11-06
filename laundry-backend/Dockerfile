@@ -33,12 +33,23 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Create entrypoint script
 RUN echo '#!/bin/bash\n\
 set -e\n\
-php artisan key:generate --force || true\n\
-php artisan config:cache || true\n\
-php artisan route:cache || true\n\
-php artisan view:cache || true\n\
-php artisan migrate --force || true\n\
+echo "Waiting for database connection..."\n\
+until php artisan migrate:status > /dev/null 2>&1; do\n\
+  echo "Database not ready, waiting..."\n\
+  sleep 2\n\
+done\n\
+echo "Database is ready!"\n\
+php artisan key:generate --force\n\
+php artisan config:clear\n\
+php artisan cache:clear\n\
+echo "Running migrations..."\n\
+php artisan migrate --force\n\
+echo "Seeding database..."\n\
 php artisan db:seed --force || true\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+php artisan view:cache\n\
+echo "Starting server..."\n\
 exec php artisan serve --host=0.0.0.0 --port=${PORT:-8000}\n\
 ' > /entrypoint.sh && chmod +x /entrypoint.sh
 
