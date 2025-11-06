@@ -162,7 +162,7 @@ function CustomerHome() {
 
                 {bestDay && (
                   <div className="best-day">
-                    <div className="best-day-label">wala pang API hehe exampol lng :P⭐ Best Day for Laundry:</div>
+                    <div className="best-day-label">⭐ Best Day for Laundry:</div>
                     <div className="best-day-info">{bestDay.date} • {Math.round(bestDay.temp)}°C</div>
                   </div>
                 )}
