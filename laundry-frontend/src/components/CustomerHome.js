@@ -16,13 +16,22 @@ function CustomerHome() {
   }, []);
 
   const fetchWeather = async () => {
+    // Get API key from environment variable (REACT_APP_OPENWEATHER_API_KEY)
+    // If you don't have an API key, it will use demo data instead
+    const apiKey = process.env.REACT_APP_OPENWEATHER_API_KEY;
+    
+      // If no API key is set, use demo weather data immediately
+      if (!apiKey || apiKey.trim() === '' || apiKey === 'YOUR_API_KEY_HERE') {
+        console.log('No OpenWeatherMap API key found. Using demo weather data.');
+        setDemoWeather();
+        return;
+      }
+
     try {
-      // Using OpenWeatherMap API - you'll need to get your own API key
-      // For now, I'll use a demo approach
       const response = await axios.get('https://api.openweathermap.org/data/2.5/forecast', {
         params: {
           q: 'Manila,PH',
-          appid: '67c3afe347b2430fa8022239250311', // Replace with your actual API key
+          appid: apiKey,
           units: 'metric',
           cnt: 5
         }
@@ -30,7 +39,9 @@ function CustomerHome() {
       setWeather(response.data);
       findBestLaundryDay(response.data.list);
     } catch (error) {
-      console.log('Weather API error:', error);
+      console.log('Weather API error:', error.response?.status === 401 
+        ? 'Invalid API key. Using demo weather data.' 
+        : 'Weather API unavailable. Using demo weather data.');
       // Set demo weather data if API fails
       setDemoWeather();
     }
@@ -39,17 +50,27 @@ function CustomerHome() {
   const setDemoWeather = () => {
     const today = new Date();
     const demoData = {
-      city: { name: 'Manila' },
+      city: { name: 'Manila', country: 'PH' },
       list: []
     };
     
+    // Generate 5 days of demo weather data
     for (let i = 0; i < 5; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() + i);
+      const weatherMain = i === 1 ? 'Rain' : i === 2 ? 'Clouds' : 'Clear';
       demoData.list.push({
-        dt: date.getTime() / 1000,
-        weather: [{ main: i === 1 ? 'Rain' : 'Clear' }],
-        main: { temp: 28 + i }
+        dt: Math.floor(date.getTime() / 1000),
+        weather: [{ 
+          main: weatherMain,
+          description: i === 1 ? 'light rain' : i === 2 ? 'partly cloudy' : 'clear sky'
+        }],
+        main: { 
+          temp: 28 + Math.floor(Math.random() * 3) - 1, // Random temp between 27-29
+          feels_like: 30,
+          temp_min: 27,
+          temp_max: 31
+        }
       });
     }
     
