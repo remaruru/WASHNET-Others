@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 // Simple chart implementation without external dependencies
 const SimpleChart = ({ data, type = 'pie', title, colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }) => {
@@ -104,7 +105,7 @@ function Analytics() {
 
   const fetchAnalytics = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/analytics');
+      const response = await axios.get(API_ENDPOINTS.ANALYTICS);
       setAnalytics(response.data);
     } catch (error) {
       console.error('Error fetching analytics:', error);

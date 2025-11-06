@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -28,7 +29,7 @@ export function AuthProvider({ children }) {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/me');
+      const response = await axios.get(API_ENDPOINTS.ME);
       const userData = response.data;
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
@@ -43,7 +44,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/login', {
+      const response = await axios.post(API_ENDPOINTS.LOGIN, {
         email,
         password,
       });
@@ -65,7 +66,7 @@ export function AuthProvider({ children }) {
 
   const register = async (name, email, password, password_confirmation, special_code) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/register', {
+      const response = await axios.post(API_ENDPOINTS.REGISTER, {
         name,
         email,
         password,
@@ -90,7 +91,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await axios.post('http://localhost:8000/api/logout');
+      await axios.post(API_ENDPOINTS.LOGOUT);
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
