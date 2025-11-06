@@ -19,9 +19,12 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Use updateOrCreate to avoid duplicate key errors on re-seeding
+        User::updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+            ]
+        );
     }
 }

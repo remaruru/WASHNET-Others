@@ -14,11 +14,14 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@laundry.com',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
+        // Use updateOrCreate to avoid duplicate key errors on re-seeding
+        User::updateOrCreate(
+            ['email' => 'admin@laundry.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
     }
 }

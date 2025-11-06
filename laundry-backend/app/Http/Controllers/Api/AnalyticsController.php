@@ -30,36 +30,70 @@ class AnalyticsController extends Controller
             });
 
         // Day of Week Analysis
-        $dayOfWeek = Order::select(
-                DB::raw('DAYNAME(created_at) as day'),
-                DB::raw('count(*) as count')
-            )
-            ->groupBy(DB::raw('DAYNAME(created_at)'))
-            ->orderBy(DB::raw('DAYOFWEEK(created_at)'))
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'day' => $item->day,
-                    'count' => $item->count
-                ];
-            });
+        if (DB::getDriverName() === 'pgsql') {
+            $dayOfWeek = Order::select(
+                    DB::raw("TO_CHAR(created_at, 'Day') as day"),
+                    DB::raw('count(*) as count')
+                )
+                ->groupBy(DB::raw("TO_CHAR(created_at, 'Day')"), DB::raw('EXTRACT(DOW FROM created_at)'))
+                ->orderBy(DB::raw('EXTRACT(DOW FROM created_at)'))
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'day' => trim($item->day),
+                        'count' => $item->count
+                    ];
+                });
+        } else {
+            $dayOfWeek = Order::select(
+                    DB::raw('DAYNAME(created_at) as day'),
+                    DB::raw('count(*) as count')
+                )
+                ->groupBy(DB::raw('DAYNAME(created_at)'))
+                ->orderBy(DB::raw('DAYOFWEEK(created_at)'))
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'day' => $item->day,
+                        'count' => $item->count
+                    ];
+                });
+        }
 
         // Revenue by Month (last 6 months)
-        $revenue = Order::select(
-                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as period'),
-                DB::raw('SUM(total_amount) as amount')
-            )
-            ->where('status', 'completed')
-            ->where('created_at', '>=', Carbon::now()->subMonths(6))
-            ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
-            ->orderBy('period')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'period' => Carbon::createFromFormat('Y-m', $item->period)->format('M Y'),
-                    'amount' => (float) $item->amount
-                ];
-            });
+        if (DB::getDriverName() === 'pgsql') {
+            $revenue = Order::select(
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as period"),
+                    DB::raw('SUM(total_amount) as amount')
+                )
+                ->where('status', 'completed')
+                ->where('created_at', '>=', Carbon::now()->subMonths(6))
+                ->groupBy(DB::raw("TO_CHAR(created_at, 'YYYY-MM')"))
+                ->orderBy('period')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'period' => Carbon::createFromFormat('Y-m', $item->period)->format('M Y'),
+                        'amount' => (float) $item->amount
+                    ];
+                });
+        } else {
+            $revenue = Order::select(
+                    DB::raw('DATE_FORMAT(created_at, "%Y-%m") as period'),
+                    DB::raw('SUM(total_amount) as amount')
+                )
+                ->where('status', 'completed')
+                ->where('created_at', '>=', Carbon::now()->subMonths(6))
+                ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
+                ->orderBy('period')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'period' => Carbon::createFromFormat('Y-m', $item->period)->format('M Y'),
+                        'amount' => (float) $item->amount
+                    ];
+                });
+        }
 
         // Customer Frequency Analysis
         $customerFrequency = Order::select(
@@ -80,19 +114,35 @@ class AnalyticsController extends Controller
             });
 
         // Peak Hours Analysis
-        $peakHours = Order::select(
-                DB::raw('HOUR(created_at) as hour'),
-                DB::raw('count(*) as count')
-            )
-            ->groupBy(DB::raw('HOUR(created_at)'))
-            ->orderBy('hour')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'hour' => $item->hour . ':00',
-                    'count' => $item->count
-                ];
-            });
+        if (DB::getDriverName() === 'pgsql') {
+            $peakHours = Order::select(
+                    DB::raw('EXTRACT(HOUR FROM created_at) as hour'),
+                    DB::raw('count(*) as count')
+                )
+                ->groupBy(DB::raw('EXTRACT(HOUR FROM created_at)'))
+                ->orderBy('hour')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'hour' => (int)$item->hour . ':00',
+                        'count' => $item->count
+                    ];
+                });
+        } else {
+            $peakHours = Order::select(
+                    DB::raw('HOUR(created_at) as hour'),
+                    DB::raw('count(*) as count')
+                )
+                ->groupBy(DB::raw('HOUR(created_at)'))
+                ->orderBy('hour')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'hour' => $item->hour . ':00',
+                        'count' => $item->count
+                    ];
+                });
+        }
 
         // Status Distribution
         $statusDistribution = Order::select('status', DB::raw('count(*) as count'))
