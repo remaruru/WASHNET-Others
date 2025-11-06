@@ -27,17 +27,17 @@
    php artisan key:generate
    ```
 
-6. **Run migrations:**
+5. **Run migrations:**
    ```bash
    php artisan migrate
    ```
 
-7. **Run seeders (optional - creates admin user):**
+6. **Run seeders (optional - creates admin user):**
    ```bash
    php artisan db:seed
    ```
 
-8. **Start Laravel server:**
+7. **Start Laravel server:**
    ```bash
    php artisan serve
    ```
