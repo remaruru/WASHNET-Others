@@ -47,6 +47,12 @@ if [ ! -f .env ]; then\n\
   echo "DB_DATABASE=${DB_DATABASE:-}" >> .env\n\
   echo "DB_USERNAME=${DB_USERNAME:-}" >> .env\n\
   echo "DB_PASSWORD=${DB_PASSWORD:-}" >> .env\n\
+  echo "SESSION_DRIVER=${SESSION_DRIVER:-database}" >> .env\n\
+  echo "CACHE_DRIVER=${CACHE_DRIVER:-database}" >> .env\n\
+  echo "QUEUE_CONNECTION=${QUEUE_CONNECTION:-database}" >> .env\n\
+  echo "LOG_CHANNEL=${LOG_CHANNEL:-stderr}" >> .env\n\
+  echo "LOG_LEVEL=${LOG_LEVEL:-error}" >> .env\n\
+  echo "FRONTEND_URL=${FRONTEND_URL:-}" >> .env\n\
 fi\n\
 echo "Waiting for database connection..."\n\
 until php artisan migrate:status > /dev/null 2>&1; do\n\
