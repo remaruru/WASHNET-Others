@@ -526,6 +526,12 @@ function CustomerHome() {
             <p className="footer-tagline">Fresh • Fast • Clean</p>
             <p className="footer-copyright">© 2025 WASHNET Laundry Management System</p>
             <p className="footer-desc">Track Your Laundry • Know the Weather • Plan Smart</p>
+            <div className="footer-developers">
+              <p className="developers-title">Developed by:</p>
+              <p className="developers-names">
+                Fritz Arrogante • Earl Angelo Roldan • Enzo Benedict Rosales • Maria Cielo Salazar • Michael Angelo Torres
+              </p>
+            </div>
           </div>
         </div>
       </footer>
