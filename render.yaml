@@ -2,10 +2,10 @@ services:
   - type: web
     name: washnet-backend
     plan: free
-    rootDir: laundry-backend
     env: docker
-    dockerfilePath: ./laundry-backend/Dockerfile
-    dockerContext: ./laundry-backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    rootDir: laundry-backend
     envVars:
       - key: APP_NAME
         value: WASHNET
