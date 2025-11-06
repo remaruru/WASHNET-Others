@@ -22,7 +22,7 @@ function CustomerHome() {
       const response = await axios.get('https://api.openweathermap.org/data/2.5/forecast', {
         params: {
           q: 'Manila,PH',
-          appid: 'demo_key', // Replace with your actual API key
+          appid: '67c3afe347b2430fa8022239250311', // Replace with your actual API key
           units: 'metric',
           cnt: 5
         }
