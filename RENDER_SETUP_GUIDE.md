@@ -21,7 +21,7 @@ This is different from services like Railway or Heroku that might support SSH. R
 
 ---
 
-## 🚀 Step 1: Create Render Account & Project
+## 🚀 Step 1: Create Render Account & Connect Repository
 
 ### 1.1 Sign Up/Login
 1. Go to https://render.com
@@ -35,7 +35,39 @@ This is different from services like Railway or Heroku that might support SSH. R
 
 ---
 
-## 🗄️ Step 2: Create PostgreSQL Database
+## 🎯 Quick Deploy Option: Using render.yaml Blueprint
+
+**This is the EASIEST way!** If you want to use the `render.yaml` file as a blueprint:
+
+### Option A: Deploy from Blueprint (Recommended)
+1. In Render dashboard, click **"+ New"** button
+2. Select **"Blueprint"**
+3. Connect your GitHub repository: `remaruru/WASHNET-Others`
+4. Render will automatically detect the `render.yaml` file
+5. Review the configuration (it will create both database and web service)
+6. Click **"Apply"** or **"Deploy"**
+7. Render will automatically:
+   - Create PostgreSQL database
+   - Create web service
+   - Set up all environment variables
+   - Deploy your backend
+
+**You still need to:**
+- Generate `APP_KEY` (see Step 5)
+- Run migrations (see Step 6)
+- Update `APP_URL` and `FRONTEND_URL` after deployment
+
+**Then skip to Step 5 in the manual setup below!**
+
+---
+
+## 📝 Manual Setup (Alternative Method)
+
+If you prefer to set up everything manually instead of using the blueprint:
+
+---
+
+## 🗄️ Step 2: Create PostgreSQL Database (Manual Setup)
 
 ### 2.1 Create Database
 1. In Render dashboard, click **"+ New"** button (top right)
@@ -66,7 +98,7 @@ This is different from services like Railway or Heroku that might support SSH. R
 
 ---
 
-## 🔧 Step 3: Create Web Service (Backend)
+## 🔧 Step 3: Create Web Service (Backend) (Manual Setup)
 
 ### 3.1 Create New Web Service
 1. In Render dashboard, click **"+ New"** button
@@ -104,7 +136,7 @@ Click **"Create Web Service"**
 
 ---
 
-## ⚙️ Step 4: Configure Environment Variables
+## ⚙️ Step 4: Configure Environment Variables (Manual Setup)
 
 ### 4.1 Access Environment Variables
 1. After creating the service, you'll be redirected to the service page
