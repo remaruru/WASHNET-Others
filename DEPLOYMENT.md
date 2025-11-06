@@ -1,114 +1,50 @@
 # Deployment Guide: WASHNET Laundry Management System
 
-This guide will help you deploy the backend to Railway (with PostgreSQL) and the frontend to Vercel.
+This guide will help you deploy the backend to Render (with PostgreSQL) and the frontend to Vercel.
 
 ## Prerequisites
 
 - GitHub account
-- Railway account (sign up at https://railway.app)
+- Render account (sign up at https://render.com)
 - Vercel account (sign up at https://vercel.com)
 - Git installed on your local machine
 
 ---
 
-## Part 1: Deploy Backend to Railway
+## Part 1: Deploy Backend to Render
 
-### Step 1: Push Code to GitHub
+### Quick Setup
 
-1. Make sure all your changes are committed:
-   ```bash
-   git add .
-   git commit -m "Prepare for deployment"
-   git push origin master
-   ```
+For detailed step-by-step instructions, see **`RENDER_SETUP_GUIDE.md`**
 
-### Step 2: Create PostgreSQL Database on Railway
+### Summary Steps:
 
-1. Go to https://railway.app and sign in
-2. Click **"New Project"**
-3. Select **"Empty Project"**
-4. Click **"New"** → **"Database"** → **"Add PostgreSQL"**
-5. Wait for the database to be provisioned
-6. Click on the PostgreSQL service
-7. Go to the **"Variables"** tab
-8. **Copy these values** (you'll need them later):
-   - `PGHOST`
-   - `PGPORT`
-   - `PGDATABASE`
-   - `PGUSER`
-   - `PGPASSWORD`
+1. **Create Render Account**
+   - Go to https://render.com
+   - Sign up with GitHub
 
-### Step 3: Deploy Laravel Backend to Railway
+2. **Create PostgreSQL Database**
+   - New → PostgreSQL
+   - Choose free plan
+   - Note database credentials
 
-1. In the same Railway project, click **"New"** → **"GitHub Repo"**
-2. Select your repository: `remaruru/WASHNET-Others`
-3. Select the **`laundry-backend`** directory as the root directory (or create a new service)
-4. Railway will automatically detect it's a PHP/Laravel project
+3. **Create Web Service**
+   - New → Web Service
+   - Connect GitHub repo
+   - Set root directory: `laundry-backend`
+   - Build command: `composer install --no-dev --optimize-autoloader && php artisan config:cache && php artisan route:cache && php artisan view:cache`
+   - Start command: `php artisan serve --host=0.0.0.0 --port=$PORT`
 
-### Step 4: Configure Backend Environment Variables
+4. **Configure Environment Variables**
+   - Add all required variables (see RENDER_SETUP_GUIDE.md)
+   - Link PostgreSQL database or enter credentials manually
 
-1. Click on your backend service
-2. Go to the **"Variables"** tab
-3. Click **"New Variable"** and add the following:
+5. **Generate APP_KEY and Run Migrations**
+   - Use Render Shell to run migrations
+   - Generate app key locally or in shell
 
-```env
-# App Configuration
-APP_NAME=WASHNET
-APP_ENV=production
-APP_KEY=base64:YOUR_APP_KEY_HERE
-APP_DEBUG=false
-APP_URL=https://your-backend-service.railway.app
-
-# Database Configuration (use the PostgreSQL values from Step 2)
-DB_CONNECTION=pgsql
-DB_HOST=${PGHOST}
-DB_PORT=${PGPORT}
-DB_DATABASE=${PGDATABASE}
-DB_USERNAME=${PGUSER}
-DB_PASSWORD=${PGPASSWORD}
-
-# Frontend URL (update after deploying frontend)
-FRONTEND_URL=https://your-frontend.vercel.app
-
-# Session & Cache
-SESSION_DRIVER=database
-CACHE_DRIVER=database
-QUEUE_CONNECTION=database
-
-# Logging
-LOG_CHANNEL=stderr
-LOG_LEVEL=error
-```
-
-**Important Notes:**
-- Replace `APP_KEY` with your Laravel app key (run `php artisan key:generate` locally and copy the key)
-- Replace `APP_URL` with your Railway backend URL (will be generated after deployment)
-- Replace `FRONTEND_URL` with your Vercel frontend URL (update after deploying frontend)
-
-### Step 5: Generate App Key and Run Migrations
-
-1. In Railway, go to your backend service
-2. Click on **"Settings"** → **"Deploy"**
-3. Add a **"Deploy Command"**:
-   ```bash
-   php artisan key:generate --force && php artisan migrate --force && php artisan db:seed --force
-   ```
-4. Or manually run via Railway's console:
-   - Go to your service → **"Deployments"** → Click on the latest deployment
-   - Open **"View Logs"** → Click **"Open Shell"**
-   - Run:
-     ```bash
-     php artisan key:generate --force
-     php artisan migrate --force
-     php artisan db:seed --force
-     ```
-
-### Step 6: Get Your Backend URL
-
-1. After deployment, go to your backend service
-2. Click **"Settings"** → **"Domains"**
-3. Copy your Railway-provided URL (e.g., `https://your-app-name.up.railway.app`)
-4. **Save this URL** - you'll need it for the frontend configuration
+6. **Get Backend URL**
+   - Your service URL: `https://your-service-name.onrender.com`
 
 ---
 
@@ -201,17 +137,23 @@ This will:
 1. **Database Connection Errors**
    - Verify all PostgreSQL environment variables are set correctly
    - Check that `DB_CONNECTION=pgsql` is set
-   - Ensure database service is running in Railway
+   - Ensure database service is running in Render
+   - Try linking database resource instead of manual setup
 
 2. **CORS Errors**
    - Verify `FRONTEND_URL` matches your Vercel URL exactly (no trailing slash)
    - Clear browser cache
-   - Check Railway logs for errors
+   - Check Render logs for errors
 
 3. **500 Errors**
-   - Check Railway logs: Service → Deployments → View Logs
+   - Check Render logs: Service → Logs tab
    - Verify `APP_KEY` is set
    - Check that migrations have run successfully
+
+4. **Service Sleeping (Free Plan)**
+   - Free Render services sleep after 15 minutes of inactivity
+   - First request after sleep takes ~30 seconds
+   - Consider upgrading for always-on service
 
 ### Frontend Issues
 
@@ -229,17 +171,17 @@ This will:
 
 ## Environment Variables Reference
 
-### Backend (Railway)
+### Backend (Render)
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `APP_URL` | Backend URL | `https://your-app.railway.app` |
+| `APP_URL` | Backend URL | `https://your-app.onrender.com` |
 | `FRONTEND_URL` | Frontend URL | `https://your-app.vercel.app` |
 | `DB_CONNECTION` | Database type | `pgsql` |
-| `DB_HOST` | Database host | `${PGHOST}` |
-| `DB_DATABASE` | Database name | `${PGDATABASE}` |
-| `DB_USERNAME` | Database user | `${PGUSER}` |
-| `DB_PASSWORD` | Database password | `${PGPASSWORD}` |
+| `DB_HOST` | Database host | From Render database settings |
+| `DB_DATABASE` | Database name | From Render database settings |
+| `DB_USERNAME` | Database user | From Render database settings |
+| `DB_PASSWORD` | Database password | From Render database settings |
 
 ### Frontend (Vercel)
 
