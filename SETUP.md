@@ -3,7 +3,7 @@
 ## Prerequisites
 - PHP 8.2+ with Composer
 - Node.js 16+ with npm
-- PostgreSQL database (or MySQL/SQLite)
+- MySQL database
 
 ## Backend Setup (Laravel)
 
@@ -22,17 +22,7 @@
    cp .env.example .env
    ```
 
-4. **Configure database in `.env`:**
-   ```env
-   DB_CONNECTION=pgsql  # or mysql/sqlite
-   DB_HOST=127.0.0.1
-   DB_PORT=5432
-   DB_DATABASE=your_database_name
-   DB_USERNAME=your_username
-   DB_PASSWORD=your_password
-   ```
-
-5. **Generate application key:**
+4. **Generate application key:**
    ```bash
    php artisan key:generate
    ```
@@ -82,8 +72,7 @@
 - **Password:** admin123
 
 ## Notes
-- Make sure your database is created before running migrations
-- For PostgreSQL, ensure the database and user exist
+- Make sure your MySQL database is created before running migrations
 - The backend and frontend must run simultaneously
 - Update `REACT_APP_API_URL` in frontend `.env` if backend runs on a different port
 
