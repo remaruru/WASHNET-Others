@@ -12,11 +12,12 @@ class AnalyticsController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        
-        if (!$user || !$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        try {
+            $user = $request->user();
+            
+            if (!$user || !$user->isAdmin()) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
 
         // Service Type Distribution
         $serviceTypes = Order::select('service_type', DB::raw('count(*) as count'))
@@ -33,10 +34,11 @@ class AnalyticsController extends Controller
         if (DB::getDriverName() === 'pgsql') {
             $dayOfWeek = Order::select(
                     DB::raw("TO_CHAR(created_at, 'Day') as day"),
+                    DB::raw('EXTRACT(DOW FROM created_at) as day_num'),
                     DB::raw('count(*) as count')
                 )
                 ->groupBy(DB::raw("TO_CHAR(created_at, 'Day')"), DB::raw('EXTRACT(DOW FROM created_at)'))
-                ->orderBy(DB::raw('EXTRACT(DOW FROM created_at)'))
+                ->orderBy('day_num')
                 ->get()
                 ->map(function ($item) {
                     return [
@@ -155,14 +157,25 @@ class AnalyticsController extends Controller
                 ];
             });
 
-        return response()->json([
-            'serviceTypes' => $serviceTypes,
-            'dayOfWeek' => $dayOfWeek,
-            'revenue' => $revenue,
-            'customerFrequency' => $customerFrequency,
-            'peakHours' => $peakHours,
-            'statusDistribution' => $statusDistribution
-        ]);
+            return response()->json([
+                'serviceTypes' => $serviceTypes,
+                'dayOfWeek' => $dayOfWeek,
+                'revenue' => $revenue,
+                'customerFrequency' => $customerFrequency,
+                'peakHours' => $peakHours,
+                'statusDistribution' => $statusDistribution
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Analytics error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return response()->json([
+                'message' => 'Error fetching analytics',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     private function getServiceTypeDisplayName($serviceType)
