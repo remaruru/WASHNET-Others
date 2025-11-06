@@ -12,8 +12,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Update the service_type enum to include 'mixed'
-        DB::statement("ALTER TABLE orders MODIFY COLUMN service_type ENUM('wash_dry', 'wash_only', 'dry_only', 'mixed') DEFAULT 'wash_dry'");
+        // For PostgreSQL, drop existing constraint if exists, then add new one
+        if (DB::getDriverName() === 'pgsql') {
+            // Drop existing constraint if it exists
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_service_type_check');
+            // Add new constraint with 'mixed' included
+            DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_service_type_check CHECK (service_type IN ('wash_dry', 'wash_only', 'dry_only', 'mixed'))");
+            // Update default if needed
+            DB::statement("ALTER TABLE orders ALTER COLUMN service_type SET DEFAULT 'wash_dry'");
+        } else {
+            // MySQL syntax (for backward compatibility)
+            DB::statement("ALTER TABLE orders MODIFY COLUMN service_type ENUM('wash_dry', 'wash_only', 'dry_only', 'mixed') DEFAULT 'wash_dry'");
+        }
     }
 
     /**
@@ -21,7 +31,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert the service_type enum to original values
-        DB::statement("ALTER TABLE orders MODIFY COLUMN service_type ENUM('wash_dry', 'wash_only', 'dry_only') DEFAULT 'wash_dry'");
+        // For PostgreSQL, drop constraint and recreate with original values
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_service_type_check');
+            DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_service_type_check CHECK (service_type IN ('wash_dry', 'wash_only', 'dry_only'))");
+        } else {
+            // MySQL syntax
+            DB::statement("ALTER TABLE orders MODIFY COLUMN service_type ENUM('wash_dry', 'wash_only', 'dry_only') DEFAULT 'wash_dry'");
+        }
     }
 };

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -19,12 +20,18 @@ return new class extends Migration
             $table->string('customer_email')->nullable();
             $table->text('items'); // JSON string of laundry items
             $table->decimal('total_amount', 10, 2);
-            $table->enum('status', ['pending', 'processing', 'ready', 'completed', 'cancelled'])->default('pending');
+            // Use string for PostgreSQL compatibility, add constraint after
+            $table->string('status')->default('pending');
             $table->text('notes')->nullable();
             $table->date('pickup_date')->nullable();
             $table->date('delivery_date')->nullable();
             $table->timestamps();
         });
+        
+        // Add check constraint for PostgreSQL
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_status_check CHECK (status IN ('pending', 'processing', 'ready', 'completed', 'cancelled'))");
+        }
     }
 
     /**
@@ -32,6 +39,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Drop constraint first for PostgreSQL
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check');
+        }
         Schema::dropIfExists('orders');
     }
 };

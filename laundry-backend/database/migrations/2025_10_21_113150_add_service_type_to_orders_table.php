@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -12,8 +13,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->enum('service_type', ['wash_dry', 'wash_only', 'dry_only'])->default('wash_dry')->after('status');
+            // PostgreSQL doesn't support 'after', and enum handling is different
+            $table->string('service_type')->default('wash_dry');
         });
+        
+        // Add check constraint for PostgreSQL
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_service_type_check CHECK (service_type IN ('wash_dry', 'wash_only', 'dry_only'))");
+        }
     }
 
     /**
@@ -21,6 +28,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Drop constraint first for PostgreSQL
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_service_type_check');
+        }
         Schema::table('orders', function (Blueprint $table) {
             $table->dropColumn('service_type');
         });
