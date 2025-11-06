@@ -33,13 +33,35 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Create entrypoint script
 RUN echo '#!/bin/bash\n\
 set -e\n\
+echo "Creating .env file from environment variables..."\n\
+if [ ! -f .env ]; then\n\
+  touch .env\n\
+  echo "APP_NAME=${APP_NAME:-Laravel}" >> .env\n\
+  echo "APP_ENV=${APP_ENV:-production}" >> .env\n\
+  echo "APP_KEY=${APP_KEY:-}" >> .env\n\
+  echo "APP_DEBUG=${APP_DEBUG:-false}" >> .env\n\
+  echo "APP_URL=${APP_URL:-http://localhost}" >> .env\n\
+  echo "DB_CONNECTION=${DB_CONNECTION:-pgsql}" >> .env\n\
+  echo "DB_HOST=${DB_HOST:-}" >> .env\n\
+  echo "DB_PORT=${DB_PORT:-5432}" >> .env\n\
+  echo "DB_DATABASE=${DB_DATABASE:-}" >> .env\n\
+  echo "DB_USERNAME=${DB_USERNAME:-}" >> .env\n\
+  echo "DB_PASSWORD=${DB_PASSWORD:-}" >> .env\n\
+fi\n\
 echo "Waiting for database connection..."\n\
 until php artisan migrate:status > /dev/null 2>&1; do\n\
   echo "Database not ready, waiting..."\n\
   sleep 2\n\
 done\n\
 echo "Database is ready!"\n\
-php artisan key:generate --force\n\
+if [ -z "$APP_KEY" ] || grep -q "APP_KEY=$" .env || grep -q "^APP_KEY=$" .env; then\n\
+  echo "Generating APP_KEY..."\n\
+  php artisan key:generate --force\n\
+  APP_KEY=$(grep "^APP_KEY=" .env | cut -d "=" -f2-)\n\
+  echo "Generated APP_KEY: $APP_KEY"\n\
+else\n\
+  echo "APP_KEY already set"\n\
+fi\n\
 php artisan config:clear\n\
 php artisan cache:clear\n\
 echo "Running migrations..."\n\
