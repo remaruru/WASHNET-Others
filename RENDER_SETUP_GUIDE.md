@@ -9,6 +9,16 @@ This guide will walk you through deploying your Laravel backend to Render step b
 - ✅ GitHub repository is pushed (your code is on GitHub)
 - ✅ Render account (sign up at https://render.com - it's free!)
 
+## ⚠️ Important Note About Render Shell
+
+**Render does NOT support SSH access.** Instead, Render provides a web-based shell interface that you access through your browser. When you need to run commands (like migrations), you'll use:
+- **Shell tab** in your service dashboard
+- Click **"Connect"** or **"Open Shell"** button
+- A web terminal opens in your browser
+- This is fully functional for running commands like `php artisan migrate`
+
+This is different from services like Railway or Heroku that might support SSH. Render's web shell is sufficient for all deployment tasks.
+
 ---
 
 ## 🚀 Step 1: Create Render Account & Project
@@ -237,37 +247,54 @@ Instead of manually entering database values, you can:
 7. Paste the key value
 8. Click **"Save Changes"**
 
-### Option B: Generate on Render
-1. Render → Your Service → **"Shell"** tab (or "Logs" tab)
-2. Click **"Connect"** to open a shell
-3. Run:
+### Option B: Generate on Render (Web Shell)
+1. Render → Your Service → **"Shell"** tab
+2. Click **"Connect"** or **"Open Shell"** to open the web-based terminal
+3. Navigate to your backend directory if needed:
+   ```bash
+   cd laundry-backend
+   ```
+4. Run:
    ```bash
    php artisan key:generate --force
    ```
-4. The key will be automatically added to your environment variables
-5. Copy it and update the `APP_KEY` variable manually
+5. The key will be shown in the output - copy it
+6. Go to **"Environment"** tab → Find `APP_KEY` → Click edit → Paste the key → Save
+
+**Note:** The key won't automatically be added to environment variables. You need to copy it from the shell output and add it manually.
 
 ---
 
 ## 🗃️ Step 6: Run Database Migrations
 
 ### 6.1 Access Render Shell
-1. Render → Your Service → **"Shell"** tab
-2. Click **"Connect"** button
-3. A terminal will open in your browser
+**Note:** Render doesn't support SSH. You'll use Render's web-based shell interface.
+
+1. Render → Your Service → **"Shell"** tab (or look for "Shell" in the service dashboard)
+2. Click **"Connect"** or **"Open Shell"** button
+3. A web-based terminal will open in your browser
+4. This terminal is connected to your service's environment
 
 ### 6.2 Run Migrations
-In the shell, run these commands one by one:
+**Important:** Make sure you're in the correct directory. The shell should automatically be in your service root.
+
+In the Render web shell, run these commands one by one:
 
 ```bash
 cd laundry-backend
 php artisan migrate --force
 ```
 
-Wait for it to complete, then:
+Wait for it to complete (you'll see success messages), then:
 
 ```bash
 php artisan db:seed --force
+```
+
+**Note:** If you get "command not found" errors, the shell might not be in the right directory. Try:
+```bash
+pwd  # Check current directory
+ls   # List files to verify you're in the right place
 ```
 
 This will:

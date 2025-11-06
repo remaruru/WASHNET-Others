@@ -40,8 +40,9 @@ For detailed step-by-step instructions, see **`RENDER_SETUP_GUIDE.md`**
    - Link PostgreSQL database or enter credentials manually
 
 5. **Generate APP_KEY and Run Migrations**
-   - Use Render Shell to run migrations
-   - Generate app key locally or in shell
+   - Use Render's web-based Shell (via dashboard) to run migrations
+   - Generate app key locally (recommended) or copy from Render shell output
+   - Note: Render doesn't support SSH - use the web shell interface
 
 6. **Get Backend URL**
    - Your service URL: `https://your-service-name.onrender.com`
